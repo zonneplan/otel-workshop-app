@@ -1,0 +1,24 @@
+{
+  "name": "battery-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/battery-api/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "battery-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "battery-api:build:development"
+        },
+        "production": {
+          "buildTarget": "battery-api:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
