@@ -1,0 +1,24 @@
+{
+  "name": "control-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/control-api/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "control-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "control-api:build:development"
+        },
+        "production": {
+          "buildTarget": "control-api:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
