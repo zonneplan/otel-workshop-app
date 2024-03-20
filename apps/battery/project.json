@@ -1,0 +1,62 @@
+{
+  "name": "battery",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/battery/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/battery",
+        "format": [
+          "cjs"
+        ],
+        "bundle": false,
+        "main": "apps/battery/src/main.ts",
+        "tsConfig": "apps/battery/tsconfig.app.json",
+        "assets": [
+          "apps/battery/src/assets"
+        ],
+        "generatePackageJson": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "battery:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "battery:build:development"
+        },
+        "production": {
+          "buildTarget": "battery:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
