@@ -10,6 +10,7 @@ import {BatteryMeasurementsConsumerService} from "./app/services/battery-measure
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3002;
+  app.enableShutdownHooks();
 
   const config = new DocumentBuilder()
     .setTitle('Battery API')
