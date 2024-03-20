@@ -18,11 +18,11 @@ const battery = new Battery(
 );
 
 battery.on('operating-state', (operatingState) => {
-  console.log(`Battery state changed to: ${operatingState}`);
+  console.debug(`Battery state changed to: ${operatingState}`);
 });
 
 battery.on('tick', (percentage) => {
-  console.log(`Battery percentage set to: ${percentage}`);
+  console.debug(`Battery percentage set to: ${percentage}`);
 });
 
 kafkaConsumer.consume(async ({message}) => {

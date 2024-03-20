@@ -1,4 +1,4 @@
-import {BatteryOperatingState} from '@otel-workshop-app/shared';
+import { BatteryOperatingState } from './battery-operating-state.model';
 
 export interface BatteryState {
   /**

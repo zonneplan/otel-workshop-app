@@ -1,6 +1,7 @@
 import {Kafka, Partitioners, Producer} from "kafkajs";
-import {OnModuleDestroy, OnModuleInit} from "@nestjs/common";
+import {Injectable, OnModuleDestroy, OnModuleInit} from "@nestjs/common";
 
+@Injectable()
 export class KafkaProducer implements OnModuleInit, OnModuleDestroy {
   private readonly producer: Producer;
 

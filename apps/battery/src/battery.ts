@@ -1,7 +1,11 @@
 import EventEmitter from "node:events";
-import {BatteryState} from "./battery-state";
 import {KafkaProducer} from "@otel-workshop-app/kafka";
-import {BatteryInstruction, BatteryInstructionResponse, BatteryOperatingState} from "@otel-workshop-app/shared";
+import {
+  BatteryInstruction,
+  BatteryInstructionResponse,
+  BatteryOperatingState,
+  BatteryState
+} from "@otel-workshop-app/shared";
 
 export class Battery extends EventEmitter {
   private state: BatteryState = {
@@ -24,7 +28,8 @@ export class Battery extends EventEmitter {
     if (incomingState === 'charging' && this.state.percentage === 100 || incomingState === 'discharging' && this.state.percentage === 0) {
       this.publishInstructionStatus({
         id,
-        status: 'error'
+        status: 'error',
+        message: 'Battery is already fully charged or empty. No action taken.'
       }).then()
     }
 

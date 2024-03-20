@@ -1,6 +1,7 @@
 import {Consumer, EachMessageHandler, Kafka} from "kafkajs";
-import {OnModuleDestroy, OnModuleInit} from "@nestjs/common";
+import {Injectable, OnModuleDestroy, OnModuleInit} from "@nestjs/common";
 
+@Injectable()
 export class KafkaConsumer implements OnModuleInit, OnModuleDestroy {
   private readonly consumer: Consumer;
 

@@ -8,4 +8,5 @@ export interface BatteryInstruction {
 export interface BatteryInstructionResponse {
   id: number;
   status: 'success' | 'error';
+  message?: string;
 }
