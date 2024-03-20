@@ -3,7 +3,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
+  NotFoundException,
   Post,
 } from '@nestjs/common';
 import { BatteryMeasurementCacheRepository } from '../repositories/battery-measurement-cache.repository';
@@ -26,7 +26,12 @@ export class BatteryController {
     type: BatteryStateResponseDto,
   })
   public async getInfo(): Promise<BatteryStateResponseDto> {
-    throw new InternalServerErrorException();
+    const state = this.batteryMeasurementsCacheRepository.getLatestState();
+    if (!state) {
+      throw new NotFoundException('No battery state found');
+    }
+
+    return new BatteryStateResponseDto(state);
   }
 
   @Post('charge')

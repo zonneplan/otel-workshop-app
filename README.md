@@ -30,13 +30,12 @@ In de [app.module](apps/control-api/src/app/app.module.ts) kan je de `LoggerModu
 <summary>Code voorbeeld LoggerModule</summary>
 
 ```typescript
-import {LoggerModule} from '@zonneplan/open-telemetry-zonneplan';
+import { LoggerModule } from '@zonneplan/open-telemetry-zonneplan';
 
 @Module({
   imports: [LoggerModule],
 })
-export class AppModule {
-}
+export class AppModule {}
 ```
 
 </details>
@@ -45,12 +44,11 @@ export class AppModule {
 <summary>Code voorbeeld LoggerService</summary>
 
 ```typescript
-import {LoggerService} from '@zonneplan/open-telemetry-zonneplan';
+import { LoggerService } from '@zonneplan/open-telemetry-zonneplan';
 
 @Injectable()
 export class BatteryService {
-  constructor(private readonly logger: LoggerService) {
-  }
+  constructor(private readonly logger: LoggerService) {}
 }
 ```
 
