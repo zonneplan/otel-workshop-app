@@ -1,13 +1,19 @@
-import {Injectable} from "@nestjs/common";
-import {KafkaProducer} from "@otel-workshop-app/kafka";
-import {BatteryInstruction, BatteryOperatingState} from "@otel-workshop-app/shared";
-import {span} from "@zonneplan/open-telemetry-node";
+import { Injectable } from '@nestjs/common';
+import { KafkaProducer } from '@otel-workshop-app/kafka';
+import {
+  BatteryInstruction,
+  BatteryOperatingState,
+} from '@otel-workshop-app/shared';
+import { span } from '@zonneplan/open-telemetry-node';
+import { LoggerService } from '@zonneplan/open-telemetry-nest';
 
 @Injectable()
 export class BatteryInstructionService {
   public constructor(
-    private readonly kafkaProducer: KafkaProducer
+    private readonly kafkaProducer: KafkaProducer,
+    private readonly logger: LoggerService
   ) {
+    logger.setContext(this.constructor.name);
   }
 
   @span()
@@ -15,10 +21,17 @@ export class BatteryInstructionService {
     const id = this.getRandomIdentifier();
     const instruction: BatteryInstruction = {
       id,
-      state
-    }
+      state,
+    };
 
-    await this.kafkaProducer.send(process.env['KAFKA_TOPIC_BATTERY_INSTRUCTIONS'], instruction);
+    await this.kafkaProducer.send(
+      process.env['KAFKA_TOPIC_BATTERY_INSTRUCTIONS'],
+      instruction
+    );
+
+    this.logger.log(
+      `Sent battery instruction with id ${id} and state ${state}`
+    );
 
     return id;
   }
