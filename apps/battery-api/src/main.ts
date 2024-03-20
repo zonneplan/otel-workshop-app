@@ -1,3 +1,32 @@
+import otel = require('@zonneplan/open-telemetry-node');
+import stb = require("@opentelemetry/sdk-trace-base");
+import etoh = require("@opentelemetry/exporter-trace-otlp-http");
+import ain = require("@opentelemetry/auto-instrumentations-node");
+import inc = require("@opentelemetry/instrumentation-nestjs-core");
+import oik = require("opentelemetry-instrumentation-kafkajs");
+
+new otel.OpenTelemetryBuilder('battery-api')
+  .withTracing(options =>
+    options
+      .withSampler(new stb.AlwaysOnSampler())
+      .withSpanExporter(new etoh.OTLPTraceExporter())
+      .withSpanProcessor(exporter => new stb.BatchSpanProcessor(exporter))
+      .withInstrumentation(
+        ain.getNodeAutoInstrumentations({
+          '@opentelemetry/instrumentation-fs': {
+            enabled: false
+          },
+        }),
+        new inc.NestInstrumentation({
+          enabled: true
+        }),
+        new oik.KafkaJsInstrumentation({
+          enabled: true
+        })
+      )
+  )
+  .start();
+
 import 'dotenv/config';
 
 import {Logger} from '@nestjs/common';

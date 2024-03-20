@@ -1,6 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {KafkaProducer} from "@otel-workshop-app/kafka";
 import {BatteryInstruction, BatteryOperatingState} from "@otel-workshop-app/shared";
+import {span} from "@zonneplan/open-telemetry-node";
 
 @Injectable()
 export class BatteryInstructionService {
@@ -9,6 +10,7 @@ export class BatteryInstructionService {
   ) {
   }
 
+  @span()
   public async sendState(state: BatteryOperatingState): Promise<number> {
     const id = this.getRandomIdentifier();
     const instruction: BatteryInstruction = {

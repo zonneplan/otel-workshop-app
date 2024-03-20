@@ -2,6 +2,7 @@ import {Injectable} from "@nestjs/common";
 import {KafkaConsumer} from "@otel-workshop-app/kafka";
 import {BatteryState} from "@otel-workshop-app/shared";
 import {BatteryMeasurementCacheRepository} from "../repositories/battery-measurement-cache.repository";
+import {setAttributesOnActiveSpan, span} from "@zonneplan/open-telemetry-node";
 
 @Injectable()
 export class BatteryMeasurementsConsumerService {
@@ -23,7 +24,13 @@ export class BatteryMeasurementsConsumerService {
     })
   }
 
+  @span()
   private handleMessage(measurement: BatteryState) {
+    setAttributesOnActiveSpan({
+      'data.percentage': measurement.percentage,
+      'data.operatingState': measurement.operatingState
+    });
+
     this.batteryMeasurementCacheRepository.setLatestState(measurement);
   }
 }
