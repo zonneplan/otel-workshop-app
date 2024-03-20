@@ -31,6 +31,8 @@ Voeg een `@span` decorator toe aan de `getResponse` methode in de [battery servi
 
 **STAP 2: Voeg auto instrumentation toe**
 
+Ga eerst naar de [battery-api.service.ts](apps/control-api/src/app/services/battery-api.service.ts), verwijder de niet commented code en uncomment de commented code. OpenTelemetry heeft helaas momenteel geen ondersteuning voor de fetch API van Node, waardoor we geen auto instrumentation kunnen uitoefenen om de traces aan elkaar te koppelen tussen applicaties. Daardoor gebruiken we nu even axios om dit concept wel duidelijk te maken.
+
 Door middel van auto instrumentation worden automatisch spans gemaakt en attributen toegevoegd waardoor de volgende applicatie in de flow weet waar het vandaan komt en dus de 'traces' aan elkaar kan koppelen. Voeg auto instrumentation toe, zie onderstaande voorbeeld.
 
 ```typescript
