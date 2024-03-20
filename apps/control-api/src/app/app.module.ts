@@ -6,6 +6,8 @@ import { BatteryApiService } from './services/battery-api.service';
 import { KafkaConsumerModule } from '@otel-workshop-app/kafka';
 import { BatteryController } from './controllers/battery.controller';
 import { LoggerModule } from '@zonneplan/open-telemetry-zonneplan';
+import { ValueType } from '@opentelemetry/api';
+import { createCounterProvider } from '@zonneplan/open-telemetry-nest';
 
 @Module({
   imports: [KafkaConsumerModule, LoggerModule],
@@ -30,6 +32,12 @@ import { LoggerModule } from '@zonneplan/open-telemetry-zonneplan';
         return client;
       },
     },
+    createCounterProvider({
+      valueType: ValueType.INT,
+      description:
+        'Number of times an instruction has been passed to the battery',
+      name: 'battery_instruction_calls',
+    }),
   ],
 })
 export class AppModule {}
