@@ -1,13 +1,14 @@
-import {Module} from '@nestjs/common';
-import {Client} from "pg";
-import {BatteryInstructionStatusConsumerService} from "./services/battery-instruction-status-consumer.service";
-import {InstructionRepository} from "./repositories/instruction.repository";
-import {BatteryApiService} from "./services/battery-api.service";
-import {KafkaConsumerModule} from "@otel-workshop-app/kafka";
-import {BatteryController} from "./controllers/battery.controller";
+import { Module } from '@nestjs/common';
+import { Client } from 'pg';
+import { BatteryInstructionStatusConsumerService } from './services/battery-instruction-status-consumer.service';
+import { InstructionRepository } from './repositories/instruction.repository';
+import { BatteryApiService } from './services/battery-api.service';
+import { KafkaConsumerModule } from '@otel-workshop-app/kafka';
+import { BatteryController } from './controllers/battery.controller';
+import { LoggerModule } from '@zonneplan/open-telemetry-zonneplan';
 
 @Module({
-  imports: [KafkaConsumerModule],
+  imports: [KafkaConsumerModule, LoggerModule],
   controllers: [BatteryController],
   providers: [
     // Services
@@ -27,8 +28,8 @@ import {BatteryController} from "./controllers/battery.controller";
 
         await client.connect();
         return client;
-      }
-    }],
+      },
+    },
+  ],
 })
-export class AppModule {
-}
+export class AppModule {}
