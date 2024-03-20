@@ -1,0 +1,134 @@
+version: '3'
+services:
+  grafana:
+    image: grafana/grafana:10.4.0-ubuntu
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/ds.yaml:ro
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+
+  grafana-agent:
+    image: grafana/agent:v0.40.3
+    volumes:
+      - ./grafana-agent/grafana-agent.river:/etc/agent/config.river:ro
+    environment:
+      - AGENT_MODE=flow
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - /etc/agent/config.river
+    ports:
+      - "12345:12345"
+      - 4317:4317
+      - 4318:4318
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+
+  loki:
+    image: grafana/loki:2.9.5
+    volumes:
+      - ./loki/loki.yaml:/etc/loki/loki.yaml:ro
+    command:
+      - '-config.file=/etc/loki/loki.yaml'
+    ports:
+      - 3100:3100
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-remote-write-receiver'
+    ports:
+      - 9090:9090
+
+  tempo:
+    image: grafana/tempo:latest
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+    command:
+      - '-config.file=/etc/tempo.yaml'
+    ports:
+      - 3200:3200
+
+  postgres:
+    image: postgres:16.2-bullseye
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_USER: root
+      POSTGRES_DB: postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - postgres-otel-workshop:/var/lib/postgresql-otel-workshop/data
+      - './.docker/.docker-compose.local/postgres.conf:/etc/postgresql-otel-workshop/postgresql.conf:ro'
+    command: postgres -c 'config_file=/etc/postgresql-otel-workshop/postgresql.conf'
+
+  postgres-console:
+    image: dpage/pgadmin4:latest
+    environment:
+        PGADMIN_DEFAULT_EMAIL: user@domain.com
+        PGADMIN_DEFAULT_PASSWORD: SuperSecret
+        PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - 5050:5050
+    depends_on:
+        - postgres
+
+
+  redpanda:
+    image: docker.redpanda.com/vectorized/redpanda:latest
+    container_name: local-kafka-broker-otel-workshop
+    command:
+      - redpanda
+      - start
+      - --smp
+      - '1'
+      - --reserve-memory
+      - 0M
+      - --overprovisioned
+      - --node-id
+      - '0'
+      - --kafka-addr internal://0.0.0.0:19092,external://0.0.0.0:9092
+      - --advertise-kafka-addr internal://local-kafka-broker-otel-workshop:19092,external://localhost:9092
+      - --pandaproxy-addr
+      - PLAINTEXT://0.0.0.0:28082,OUTSIDE://0.0.0.0:8082
+      - --advertise-pandaproxy-addr
+      - PLAINTEXT://redpanda:28082,OUTSIDE://localhost:8082
+    ports:
+      - 9092:9092
+
+  console:
+    container_name: kafka-console-otel-workshop
+    image: docker.redpanda.com/redpandadata/console:v2.3.3
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["local-kafka-broker-otel-workshop:19092"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://local-kafka-broker-otel-workshop:9644"]
+    ports:
+      - 8080:8080
+    depends_on:
+      redpanda:
+        condition: service_started
+
+volumes:
+    postgres-otel-workshop:
