@@ -3,6 +3,7 @@ import zonneplan = require('@zonneplan/open-telemetry-zonneplan');
 
 new otel.OpenTelemetryBuilder('control-api')
   .withLogging(zonneplan.DefaultLoggingOptions)
+  .withMetrics(zonneplan.DefaultMetricsOptions)
   .start();
 
 import 'dotenv/config';
