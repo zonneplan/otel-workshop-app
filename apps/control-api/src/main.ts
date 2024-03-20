@@ -1,13 +1,21 @@
-import 'dotenv/config';
-import {Logger} from '@nestjs/common';
-import {NestFactory} from '@nestjs/core';
+import otel = require('@zonneplan/open-telemetry-node');
+import zonneplan = require('@zonneplan/open-telemetry-zonneplan');
 
-import {AppModule} from './app/app.module';
-import {BatteryInstructionStatusConsumerService} from "./app/services/battery-instruction-status-consumer.service";
-import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
+new otel.OpenTelemetryBuilder('control-api')
+  .withLogging(zonneplan.DefaultLoggingOptions)
+  .start();
+
+import 'dotenv/config';
+import { NestFactory } from '@nestjs/core';
+
+import { AppModule } from './app/app.module';
+import { BatteryInstructionStatusConsumerService } from './app/services/battery-instruction-status-consumer.service';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { LoggerFactory } from '@zonneplan/open-telemetry-zonneplan';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new LoggerFactory().create('control-api');
+  const app = await NestFactory.create(AppModule, { logger });
   const port = process.env.PORT || 3001;
   app.enableShutdownHooks();
 
@@ -22,9 +30,7 @@ async function bootstrap() {
   await app.get(BatteryInstructionStatusConsumerService).run();
 
   await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}`
-  );
+  logger.log(`🚀 Application is running on: http://localhost:${port}/api`);
 }
 
 bootstrap();
