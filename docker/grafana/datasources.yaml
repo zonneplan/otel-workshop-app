@@ -38,8 +38,8 @@ datasources:
       datasourceUid: loki_uid
       filterByTraceID: true
       filterBySpanID: false
-      spanStartTimeShift: '1h'
-      spanEndTimeShift: '-1h'
+      spanStartTimeShift: '-1h'
+      spanEndTimeShift: '1h'
 
 - name: Prometheus
   uid: prometheus_uid
