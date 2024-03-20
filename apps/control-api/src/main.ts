@@ -2,9 +2,6 @@ import otel = require('@zonneplan/open-telemetry-node');
 import zonneplan = require('@zonneplan/open-telemetry-zonneplan');
 import stb = require('@opentelemetry/sdk-trace-base');
 import etoh = require('@opentelemetry/exporter-trace-otlp-http');
-import ki = require('opentelemetry-instrumentation-kafkajs');
-import ni = require('@opentelemetry/instrumentation-nestjs-core');
-import noi = require('@opentelemetry/auto-instrumentations-node');
 
 new otel.OpenTelemetryBuilder('control-api')
   .withLogging(zonneplan.DefaultLoggingOptions)
@@ -14,7 +11,6 @@ new otel.OpenTelemetryBuilder('control-api')
       .withSampler(new stb.AlwaysOnSampler())
       .withSpanExporter(new etoh.OTLPTraceExporter())
       .withSpanProcessor((exporter) => new stb.BatchSpanProcessor(exporter))
-      .withInstrumentation(
   )
   .start();
 
