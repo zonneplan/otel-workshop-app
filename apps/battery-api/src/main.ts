@@ -1,48 +1,46 @@
 import otel = require('@zonneplan/open-telemetry-node');
+import zonneplan = require('@zonneplan/open-telemetry-zonneplan');
 import stb = require('@opentelemetry/sdk-trace-base');
+import ki = require('opentelemetry-instrumentation-kafkajs');
 import etoh = require('@opentelemetry/exporter-trace-otlp-http');
-import ain = require('@opentelemetry/auto-instrumentations-node');
-import inc = require('@opentelemetry/instrumentation-nestjs-core');
-import oik = require('opentelemetry-instrumentation-kafkajs');
-import eloh = require('@opentelemetry/exporter-logs-otlp-http');
+import ni = require('@opentelemetry/instrumentation-nestjs-core');
+import noi = require('@opentelemetry/auto-instrumentations-node');
 
 new otel.OpenTelemetryBuilder('battery-api')
+  .withLogging(zonneplan.DefaultLoggingOptions)
   .withTracing((options) =>
     options
       .withSampler(new stb.AlwaysOnSampler())
       .withSpanExporter(new etoh.OTLPTraceExporter())
       .withSpanProcessor((exporter) => new stb.BatchSpanProcessor(exporter))
       .withInstrumentation(
-        ain.getNodeAutoInstrumentations({
+        noi.getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-fs': {
             enabled: false,
           },
         }),
-        new inc.NestInstrumentation({
+        new ki.KafkaJsInstrumentation({
           enabled: true,
         }),
-        new oik.KafkaJsInstrumentation({
+        new ni.NestInstrumentation({
           enabled: true,
         })
       )
   )
-  .withLogging((options) =>
-    options.withLogRecordExporter(new eloh.OTLPLogExporter())
-  )
   .start();
 
 import 'dotenv/config';
-import {NestFactory} from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 
-import {AppModule} from './app/app.module';
-import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
-import {BatteryMeasurementsConsumerService} from './app/services/battery-measurements-consumer.service';
-import {LoggerFactory} from '@zonneplan/open-telemetry-zonneplan';
+import { AppModule } from './app/app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { BatteryMeasurementsConsumerService } from './app/services/battery-measurements-consumer.service';
+import { LoggerFactory } from '@zonneplan/open-telemetry-zonneplan';
 
 async function bootstrap() {
   const logger = new LoggerFactory().create('main');
 
-  const app = await NestFactory.create(AppModule, {logger});
+  const app = await NestFactory.create(AppModule, { logger });
   const port = process.env.PORT || 3002;
   app.enableShutdownHooks();
 

@@ -6,6 +6,103 @@ Elke challenge bevat een omschrijving en uitklapbare vakjes, dit zijn vervolgsta
 
 **Gebruik alleen de [control-api](apps/control-api). De andere projecten zijn er om een gedistribueerd systeem na te bootsen. Behandel deze stukken code als onderdelen die worden onderhouden door een ander software-team; jij hebt er in de praktijk dus geen toegang tot.**
 
+### Challenge 3
+
+#### Opdracht
+
+Voor deze opdracht wil je gaan controleren of de instructie die je hebt gegeven ook daadwerkelijk is uitgevoerd. Je kan natuurlijk via het info endpoint status opvragen, maar het is geen garantie dat de instructie die jij gestuurd hebt ook daadwerkelijk hoort bij de status die je terugkrijgt, ondanks dat deze misschien wel hetzelfde is.
+
+Stuur een instructie (charge of discharge) en kopieer het id wat je terug krijgt van de instructie.
+Nu zie je via het [info endpoint](http://localhost:3001/api#/default/BatteryController_getInfo) dat jouw instructie goed is afgehandeld. Maar als jij vervolgens kijkt naar de [status van de instructie](http://localhost:3001/api#/default/BatteryController_getStatus) zie je er geen informatie over de status. Hoe kun je nu achterhalen waar mogelijk het probleem zit?
+
+Hier komt tracing van OpenTelemetry echt perfect van pas. Je kan namelijk zien waar de flow stopt en waar het probleem mogelijk zit.
+
+Ga naar Grafana op het [explore tabblad](http://localhost:3000/explore), selecteer Tempo als datasource. Kies vervolgens de volgende opties:
+
+- Service Name: `= ` `control-api`
+- Tags: `span` `rootName` `=` `POST /battery/...` (waarbij ... de endpoint is die je hebt aangeroepen)
+- Druk op `Run query`
+- Druk op het TraceID van de meest recente trace.
+
+Je ziet nu een waterval diagram en ziet dat deze ophoudt bij het aanroepen van de methode `charge` of `discharge`. Als je kiest voor de service name `battery-api` zie je dat de API waarnaar wij een bericht sturen ook OpenTelemetry heeft. Dat is even goed nieuws! Wat we nu kunnen doen is het toevoegen van auto instrumentation, zodat we tussen applicaties in de hele flow kunnen volgen.
+
+**STAP 1: Werken met spans**
+
+Voeg een `@span` decorator toe aan de `getResponse` methode in de [battery service](apps/control-api/src/app/services/battery-api.service.ts), zodat je zeker weet dat control API in ieder geval tot deze plek gekomen is. Valideer dat het werkt door een nieuwe trace te maken (de api nogmaals aanroepen).
+
+**STAP 2: Voeg auto instrumentation toe**
+
+Door middel van auto instrumentation worden automatisch spans gemaakt en attributen toegevoegd waardoor de volgende applicatie in de flow weet waar het vandaan komt en dus de 'traces' aan elkaar kan koppelen. Voeg auto instrumentation toe, zie onderstaande voorbeeld.
+
+```typescript
+import ki = require('opentelemetry-instrumentation-kafkajs');
+import ni = require('@opentelemetry/instrumentation-nestjs-core');
+import noi = require('@opentelemetry/auto-instrumentations-node');
+
+.
+withInstrumentation(
+  noi.getNodeAutoInstrumentations({
+    '@opentelemetry/instrumentation-fs': {
+      enabled: false,
+    },
+  }),
+  new ki.KafkaJsInstrumentation({
+    enabled: true,
+  }),
+  new ni.NestInstrumentation({
+    enabled: true,
+  })
+)
+```
+
+**STAP 3: Wat gaat er mis?**
+
+Nu kan je opnieuw de traces inspecteren en zul je ergens een fout vinden. Wat is de fout? Hoe kan je dit oplossen?
+
+#### Als je er niet uitkomt
+
+<details>
+<summary>Span toevoegen</summary>
+
+Een span kan je toevoegen door de `@span` decorator toe te voegen aan de methode.
+
+```typescript
+import {span} from '@zonneplan/open-telemetry-node';
+
+class MyClass {
+  @span()
+  async getResponse() {
+    return 'response';
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>Auto instrumentation toevoegen</summary>
+
+Auto instrumentation kan je toevoegen in de `OpenTelemetryBuilder` in de [app.module](apps/control-api/src/main.ts). Je ziet hier ook dat er overal `require` wordt gebruikt. Dit is nodig om ervoor te zorgen dat OpenTelemetry is ingeladen voordat de applicatie start. Er zijn veel verschillende instrumentaties beschikbaar, zoals voor Express, Postgres, Kafka, etc. Zie bijvoorbeeld deze lijst: https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node
+
+```typescript
+import otel = require('@zonneplan/open-telemetry-node');
+import ki = require('opentelemetry-instrumentation-kafkajs');
+
+new otel.OpenTelemetryBuilder('control-api')
+  .withTracing((options) =>
+    options
+      // ...
+      .withInstrumentation(
+        new ki.KafkaJsInstrumentation({
+          enabled: true,
+        })
+      )
+  )
+  .start();
+```
+
+</details>
+
 ### Challenge 2
 
 #### Opdracht

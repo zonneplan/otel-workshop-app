@@ -4,7 +4,7 @@ import {
   BatteryInstruction,
   BatteryOperatingState,
 } from '@otel-workshop-app/shared';
-import { span } from '@zonneplan/open-telemetry-node';
+import { setSpanError, span } from '@zonneplan/open-telemetry-node';
 import { LoggerService } from '@zonneplan/open-telemetry-nest';
 
 @Injectable()
@@ -24,16 +24,8 @@ export class BatteryInstructionService {
       state,
     };
 
-    await this.kafkaProducer.send(
-      process.env['KAFKA_TOPIC_BATTERY_INSTRUCTIONS'],
-      instruction
-    );
-
-    this.logger.log(
-      `Sent battery instruction with id ${id} and state ${state}`
-    );
-
-    return id;
+    setSpanError('Cannot process message, kafka is down.');
+    return null;
   }
 
   private getRandomIdentifier() {
