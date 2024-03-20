@@ -15,6 +15,18 @@ new otel.OpenTelemetryBuilder('control-api')
       .withSpanExporter(new etoh.OTLPTraceExporter())
       .withSpanProcessor((exporter) => new stb.BatchSpanProcessor(exporter))
       .withInstrumentation(
+        noi.getNodeAutoInstrumentations({
+          '@opentelemetry/instrumentation-fs': {
+            enabled: false,
+          },
+        }),
+        new ki.KafkaJsInstrumentation({
+          enabled: true,
+        }),
+        new ni.NestInstrumentation({
+          enabled: true,
+        })
+      )
   )
   .start();
 
