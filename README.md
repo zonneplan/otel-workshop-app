@@ -12,8 +12,7 @@ Elke challenge bevat een omschrijving en uitklapbare vakjes, dit zijn vervolgsta
 
 Voor deze opdracht wil je gaan controleren of de instructie die je hebt gegeven ook daadwerkelijk is uitgevoerd. Je kan natuurlijk via het info endpoint status opvragen, maar het is geen garantie dat de instructie die jij gestuurd hebt ook daadwerkelijk hoort bij de status die je terugkrijgt, ondanks dat deze misschien wel hetzelfde is.
 
-Stuur een instructie (charge of discharge) en kopieer het id wat je terug krijgt van de instructie.
-Nu zie je via het [info endpoint](http://localhost:3001/api#/default/BatteryController_getInfo) dat jouw instructie goed is afgehandeld. Maar als jij vervolgens kijkt naar de [status van de instructie](http://localhost:3001/api#/default/BatteryController_getStatus) zie je er geen informatie over de status. Hoe kun je nu achterhalen waar mogelijk het probleem zit?
+Stuur een instructie (charge of discharge); je komt erachter dat je een 'null' as id terug krijgt en dat de batterij niet reageert, terwijl je met het ID via de [status van de instructie](http://localhost:3001/api#/default/BatteryController_getStatus) gegarandeerd kan zijn dat je instructie goed is afgehandeld. Nu zie je via het [info endpoint](http://localhost:3001/api#/default/BatteryController_getInfo) dat jouw instructie ook niet wordt afgehandeld. Hoe kan je nu achtterhalen waar dit probleem zit?
 
 Hier komt tracing van OpenTelemetry echt perfect van pas. Je kan namelijk zien waar de flow stopt en waar het probleem mogelijk zit.
 

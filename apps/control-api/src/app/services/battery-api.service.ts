@@ -28,7 +28,6 @@ export class BatteryApiService {
     return this.getResponse('discharge', 'POST');
   }
 
-  @span()
   private async getResponse<T>(
     endpoint: string,
     method: RequestInit['method'] = 'GET'
