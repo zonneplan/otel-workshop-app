@@ -48,7 +48,6 @@ Een counter kun je aanmaken door de `getOrCreateMetric` aan te roepen. Voor een 
 ```typescript
 const myCounter = getOrCreateMetric({
   type: 'Counter',
-  valueType: ValueType.INT,
   description: 'Number of times the instruction status endpoint was called',
   name: 'instruction_status_endpoint_calls',
 });
@@ -91,18 +90,16 @@ export class BatteryService {
 
 
 @Module({
-  imports: [MetricsModule],
   providers: [
     {
       createCounterProvider({
-                              valueType: ValueType.INT,
                               description: 'Number of times the instruction status endpoint was called',
                               name: 'instruction_status_endpoint_calls',
                             })
     }
   ],
 })
-export class BatteryModule {
+export class AppModule {
 }
 ```
 
