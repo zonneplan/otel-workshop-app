@@ -68,18 +68,18 @@ myCounter.increment(1);
 <details>
 <summary>Dependency injection</summary>
 
-Je kan de counter meegeven aan de class (bijvoorbeeld de controller) door hem in de constructor mee te geven en te decoraten met de `@injectMetric` decorator. Vervolgens moet je deze dan ook meegeven in de `provide` array van de module.
+Je kan de counter meegeven aan de class (bijvoorbeeld de controller) door hem in de constructor mee te geven en te decoraten met de `@InjectMetric` decorator. Vervolgens moet je deze dan ook meegeven in de `provide` array van de module.
 
 Bij voorkeur maak je een constante aan voor de naam van de provider, zodat je bij een wijziging van de naam niet overal in de code hoeft te zoeken naar de juiste naam. (bijvoorbeeld: `const MY_COUNTER_NAME='instruction_status_endpoint_calls'`)
 
 **De class**
 
 ```typescript
-import {injectMetric} from '@zonneplan/open-telemetry-nest';
+import {InjectMetric} from '@zonneplan/open-telemetry-nest';
 
 @Injectable()
 export class BatteryService {
-  constructor(@injectMetric('instruction_status_endpoint_calls') private readonly myCounter: Counter) {
+  constructor(@InjectMetric('instruction_status_endpoint_calls') private readonly myCounter: Counter) {
   }
 }
 ```
