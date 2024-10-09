@@ -14,7 +14,7 @@ new otel.OpenTelemetryBuilder('battery-api')
       .withSpanExporter(new etoh.OTLPTraceExporter())
       .withSpanProcessor((exporter) => new stb.BatchSpanProcessor(exporter))
       .withInstrumentation(
-        noi.getNodeAutoInstrumentations({
+        ...noi.getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-fs': {
             enabled: false,
           },
