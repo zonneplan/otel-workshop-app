@@ -17,7 +17,7 @@ Maak voor zowel de charge en discharge endpoints een counter aan. Tel bij elke a
 De volgende methodes heb je nodig:
 
 - `getOrCreateMetric`: hiermee kan je een metric aanmaken. Je IDE zal aangeven welke velden nodig zijn.
-- `increment`: hiermee kan je de counter verhogen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
+- `add`: hiermee kan je de counter verhogen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
 
 OpenTelemetry ondersteunt nog een aantal andere metric types, zoals:
 
@@ -57,10 +57,10 @@ const myCounter = getOrCreateMetric({
 <details>
 <summary>Increment op een counter</summary>
 
-Een counter kan je verhogen door de `increment` methode aan te roepen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
+Een counter kan je verhogen door de `add` methode aan te roepen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
 
 ```typescript
-myCounter.increment(1);
+myCounter.add(1);
 ```
 
 </details>
