@@ -13,7 +13,7 @@ new otel.OpenTelemetryBuilder('battery-api')
       .withSpanExporter(new etoh.OTLPTraceExporter())
       .withSpanProcessor((exporter) => new stb.BatchSpanProcessor(exporter))
       .withInstrumentation(
-        ain.getNodeAutoInstrumentations({
+        ...ain.getNodeAutoInstrumentations({
           '@opentelemetry/instrumentation-fs': {
             enabled: false,
           },
@@ -32,17 +32,17 @@ new otel.OpenTelemetryBuilder('battery-api')
   .start();
 
 import 'dotenv/config';
-import {NestFactory} from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 
-import {AppModule} from './app/app.module';
-import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
-import {BatteryMeasurementsConsumerService} from './app/services/battery-measurements-consumer.service';
-import {LoggerFactory} from '@zonneplan/open-telemetry-zonneplan';
+import { AppModule } from './app/app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { BatteryMeasurementsConsumerService } from './app/services/battery-measurements-consumer.service';
+import { LoggerFactory } from '@zonneplan/open-telemetry-zonneplan';
 
 async function bootstrap() {
   const logger = new LoggerFactory().create('main');
 
-  const app = await NestFactory.create(AppModule, {logger});
+  const app = await NestFactory.create(AppModule, { logger });
   const port = process.env.PORT || 3002;
   app.enableShutdownHooks();
 
