@@ -29,32 +29,12 @@ Je ziet nu een waterval diagram en ziet dat deze ophoudt bij het aanroepen van d
 
 Voeg een `@span` decorator toe aan de `getResponse` methode in de [battery service](apps/control-api/src/app/services/battery-api.service.ts), zodat je zeker weet dat control API in ieder geval tot deze plek gekomen is. Valideer dat het werkt door een nieuwe trace te maken (de api nogmaals aanroepen).
 
-**STAP 2: Voeg auto instrumentation toe**
+**STAP 2: Auto instrumentation gebruiken**
 
 Ga eerst naar de [battery-api.service.ts](apps/control-api/src/app/services/battery-api.service.ts), verwijder de niet commented code en uncomment de commented code. OpenTelemetry heeft helaas momenteel geen ondersteuning voor de fetch API van Node, waardoor we geen auto instrumentation kunnen uitoefenen om de traces aan elkaar te koppelen tussen applicaties. Daardoor gebruiken we nu even axios om dit concept wel duidelijk te maken.
 
-Door middel van auto instrumentation worden automatisch spans gemaakt en attributen toegevoegd waardoor de volgende applicatie in de flow weet waar het vandaan komt en dus de 'traces' aan elkaar kan koppelen. Voeg auto instrumentation toe, zie onderstaande voorbeeld.
-
-```typescript
-import ki = require('opentelemetry-instrumentation-kafkajs');
-import ni = require('@opentelemetry/instrumentation-nestjs-core');
-import noi = require('@opentelemetry/auto-instrumentations-node');
-
-.
-withInstrumentation(
-  noi.getNodeAutoInstrumentations({
-    '@opentelemetry/instrumentation-fs': {
-      enabled: false,
-    },
-  }),
-  new ki.KafkaJsInstrumentation({
-    enabled: true,
-  }),
-  new ni.NestInstrumentation({
-    enabled: true,
-  })
-)
-```
+Door middel van auto instrumentation worden automatisch spans gemaakt en attributen toegevoegd waardoor de volgende applicatie in de flow weet waar het vandaan komt en dus de 'traces' aan elkaar kan koppelen.
+Zie iets verder hieronder hoe je handmatig bepaalde type auto instrumentation kan toevoegen, waaronder bijvoorbeeld voor je database of Kafka. (De OTEL SDK heeft out of the box een aantal instrumentaties, waardoor je nu zelf niks hoeft te doen).
 
 **STAP 3: Wat gaat er mis?**
 
@@ -71,9 +51,47 @@ Een span kan je toevoegen door de `@span` decorator toe te voegen aan de methode
 import {span} from '@zonneplan/open-telemetry-node';
 
 class MyClass {
+  // Via onze eigen package #1
   @span()
-  async getResponse() {
+  getResponse() {
+    // ... je code
+
     return 'response';
+  }
+  
+  // Via onze eigen package #2
+  // Net als .NET heeft TypeScript sinds kort ook een using statement (https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-2.html#using-declarations-and-explicit-resource-management)
+  // Een mooi voorbeeld is file streams, waarbij je de file automatisch sluit na het gebruik, maar waarom niet ook met spans?
+  getResponse() {
+    using span = startSpan('my-span');
+    
+    // ... je code
+    
+    return 'response';
+  }
+  
+  // Via standaard OTEL #1
+  // onze eigen package heeft ook een startSpan
+  getResponse() {
+    const span = tracer.startSpan('my-span');
+    try {
+      // ... je code
+      
+      return 'response';
+    } finally {
+        span.end();
+    }
+  }
+  
+  // Via standaard OTEL #2
+  // onze eigen package heeft ook een startActiveSpan
+  getResponse() {
+    return tracer.startActiveSpan('my-span', async (span) => {
+      // ... je code
+      
+      span.end();
+      return 'response';
+    });
   }
 }
 ```
@@ -83,7 +101,7 @@ class MyClass {
 <details>
 <summary>Auto instrumentation toevoegen</summary>
 
-Auto instrumentation kan je toevoegen in de `OpenTelemetryBuilder` in de [app.module](apps/control-api/src/main.ts). Je ziet hier ook dat er overal `require` wordt gebruikt. Dit is nodig om ervoor te zorgen dat OpenTelemetry is ingeladen voordat de applicatie start. Er zijn veel verschillende instrumentaties beschikbaar, zoals voor Express, Postgres, Kafka, etc. Zie bijvoorbeeld deze lijst: https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node
+Auto instrumentation kan je toevoegen in de `OpenTelemetryBuilder` in de [main file](apps/control-api/src/main.ts). Je ziet hier ook dat er overal `require` wordt gebruikt. Dit is nodig om ervoor te zorgen dat OpenTelemetry is ingeladen voordat de applicatie start. Er zijn veel verschillende instrumentaties beschikbaar, zoals voor Express, Postgres, Kafka, etc. Zie bijvoorbeeld deze lijst: https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/node
 
 ```typescript
 import otel = require('@zonneplan/open-telemetry-node');
