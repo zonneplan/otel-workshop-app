@@ -17,7 +17,7 @@ Maak voor zowel de charge en discharge endpoints een counter aan. Tel bij elke a
 De volgende methodes heb je nodig:
 
 - `getOrCreateMetric`: hiermee kan je een metric aanmaken. Je IDE zal aangeven welke velden nodig zijn.
-- `increment`: hiermee kan je de counter verhogen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
+- `add`: hiermee kan je de counter verhogen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
 
 OpenTelemetry ondersteunt nog een aantal andere metric types, zoals:
 
@@ -48,7 +48,6 @@ Een counter kun je aanmaken door de `getOrCreateMetric` aan te roepen. Voor een 
 ```typescript
 const myCounter = getOrCreateMetric({
   type: 'Counter',
-  valueType: ValueType.INT,
   description: 'Number of times the instruction status endpoint was called',
   name: 'instruction_status_endpoint_calls',
 });
@@ -58,10 +57,10 @@ const myCounter = getOrCreateMetric({
 <details>
 <summary>Increment op een counter</summary>
 
-Een counter kan je verhogen door de `increment` methode aan te roepen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
+Een counter kan je verhogen door de `add` methode aan te roepen. Deze heeft een nummer nodig om te bepalen hoeveel de counter omhoog moet.
 
 ```typescript
-myCounter.increment(1);
+myCounter.add(1);
 ```
 
 </details>
@@ -69,18 +68,18 @@ myCounter.increment(1);
 <details>
 <summary>Dependency injection</summary>
 
-Je kan de counter meegeven aan de class (bijvoorbeeld de controller) door hem in de constructor mee te geven en te decoraten met de `@injectMetric` decorator. Vervolgens moet je deze dan ook meegeven in de `provide` array van de module.
+Je kan de counter meegeven aan de class (bijvoorbeeld de controller) door hem in de constructor mee te geven en te decoraten met de `@InjectMetric` decorator. Vervolgens moet je deze dan ook meegeven in de `provide` array van de module.
 
 Bij voorkeur maak je een constante aan voor de naam van de provider, zodat je bij een wijziging van de naam niet overal in de code hoeft te zoeken naar de juiste naam. (bijvoorbeeld: `const MY_COUNTER_NAME='instruction_status_endpoint_calls'`)
 
 **De class**
 
 ```typescript
-import {injectMetric} from '@zonneplan/open-telemetry-nest';
+import {InjectMetric} from '@zonneplan/open-telemetry-nest';
 
 @Injectable()
 export class BatteryService {
-  constructor(@injectMetric('instruction_status_endpoint_calls') private readonly myCounter: Counter) {
+  constructor(@InjectMetric('instruction_status_endpoint_calls') private readonly myCounter: Counter) {
   }
 }
 ```
@@ -91,18 +90,16 @@ export class BatteryService {
 
 
 @Module({
-  imports: [MetricsModule],
   providers: [
     {
       createCounterProvider({
-                              valueType: ValueType.INT,
                               description: 'Number of times the instruction status endpoint was called',
                               name: 'instruction_status_endpoint_calls',
                             })
     }
   ],
 })
-export class BatteryModule {
+export class AppModule {
 }
 ```
 
