@@ -45,7 +45,7 @@ export class AppModule {
 <summary>Code voorbeeld LoggerService</summary>
 
 ```typescript
-import {LoggerService} from '@zonneplan/open-telemetry-zonneplan';
+import {LoggerService} from '@zonneplan/open-telemetry-nest';
 
 @Injectable()
 export class BatteryService {
